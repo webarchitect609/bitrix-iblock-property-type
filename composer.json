@@ -1,6 +1,6 @@
 {
   "name": "webarchitect609/bitrix-iblock-property-type",
-  "description": "Collection of custom iblock property types.",
+  "description": "Set of custom Bitrix iblock property types and basic auxiliary functionality to help develop new types as easy and fast as it possible.",
   "type": "library",
   "license": "MIT",
   "authors": [
