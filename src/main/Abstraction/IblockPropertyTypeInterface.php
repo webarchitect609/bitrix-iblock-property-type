@@ -41,60 +41,196 @@ interface IblockPropertyTypeInterface
      * ]
      *
      *
-     * TODO Протестировать утверждение "У свойств, созданных клиентом, обязан быть статическим при использовании php7"
-     * ( https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetUserTypeDescription.php )
      *
      * @return array
      */
     public function getUserTypeDescription();
 
     /**
-     * @param array $property
-     * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
-     * @param array $controlName
+     * Метод должен проверить корректность значения свойства и вернуть массив. Пустой, если ошибок нет, и с сообщениями
+     * об ошибках, если есть.
      *
-     * @return string
+     * @param array $property
+     * @param array $value
+     *
+     * @return array
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/CheckFields.php
      */
-    public function getAdminListViewHTML(array $property, array $value, array $controlName);
+    public function checkFields(array $property, array $value);
 
     /**
-     * @param array $property
-     * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
-     * @param array $controlName
-     *
-     * @return string
-     */
-    public function getPropertyFieldHtml(array $property, array $value, array $controlName);
-
-    /**
-     *
-     * @internal Если фильтр выбран, то получить доступ к его значению можно только через
-     *     $GLOBALS[$controlName['VALUE']]
-     *
+     * Метод должен вернуть фактическую длину значения свойства. Этот метод нужен только для свойств значения которых
+     * представляют собой сложные структуры (например массив).
      *
      * @param array $property
-     * @param array $controlName
+     * @param array $value
      *
-     * @return string
+     * @return int
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetLength.php
      */
-    public function getAdminFilterHTML(array $property, array $controlName);
+    public function getLength(array $property, array $value);
 
     /**
+     * Метод должен преобразовать значение свойства в формат пригодный для сохранения в базе данных. И вернуть массив
+     * вида array("VALUE" => "...", "DESCRIPTION" => "..."). Если значение свойства это массив, то разумным будет
+     * использование функции serialize. А вот Дата/время преобразуется в ODBC формат "YYYY-MM-DD HH:MI:SS". Это
+     * определит возможности сортировки и фильтрации по значениям данного свойства.
+     *
      * @param array $property
      * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
      *
-     * @return mixed
+     * @return array
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/ConvertToDB.php
      */
     public function convertToDB(array $property, array $value);
 
     /**
+     * Метод должен преобразовать значение свойства из формата пригодного для сохранения в базе данных в формат
+     * обработки. И вернуть массив вида array("VALUE" => "...", "DESCRIPTION" => "...").
+     *
      * @param array $property
      * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
      *
-     * @return mixed
+     * @return array
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/ConvertFromDB.php
      */
     public function convertFromDB(array $property, array $value);
 
-    //TODO Обязательно объявить все возможные методы, т.к. интерфейс потом надо всегда соблюдать целиком.
+    /**
+     * Метод должен вернуть HTML отображения элемента управления для редактирования значений свойства в
+     * административной части.
+     *
+     * @param array $property
+     * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetPropertyFieldHtml.php
+     */
+    public function getPropertyFieldHtml(array $property, array $value, array $control);
+
+    /**
+     * Метод должен вернуть безопасный HTML отображения значения свойства в списке элементов административной части.
+     *
+     * @param array $property
+     * @param array $value ['VALUE' => 'mixed', 'DESCRIPTION' => 'string']
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetAdminListViewHTML.php
+     */
+    public function getAdminListViewHTML(array $property, array $value, array $control);
+
+    /**
+     * Метод должна вернуть безопасный HTML отображения значения свойства в публичной части сайта. Если она вернет
+     * пустое значение, то значение отображаться не будет.
+     *
+     * @param array $property
+     * @param array $value
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetPublicViewHTML.php
+     */
+    public function getPublicViewHTML(array $property, array $value, array $control);
+
+    /**
+     * Метод должен вернуть HTML отображения элемента управления для редактирования значений свойства в публичной части
+     * сайта.
+     *
+     * @param array $property
+     * @param array $value
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetPublicEditHTML.php
+     */
+    public function getPublicEditHTML(array $property, array $value, array $control);
+
+    /**
+     * Метод должен вернуть представление значения свойства для модуля поиска.
+     *
+     * @param array $property
+     * @param array $value
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetSearchContent.php
+     */
+    public function getSearchContent(array $property, array $value, array $control);
+
+    /**
+     * Метод возвращает либо массив с дополнительными настройками свойства, либо весь набор настроек, включая
+     * стандартные.
+     *
+     * @param array $property
+     *
+     * @return array|string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/PrepareSettings.php
+     */
+    public function prepareSettings(array $property);
+
+    /**
+     * Метод должен вернуть безопасный HTML отображения настроек свойства для формы редактирования инфоблока.
+     *
+     * @param array $property
+     * @param array $value
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetSettingsHTML.php
+     */
+    public function getSettingsHTML(array $property, array $value, array $control);
+
+    /**
+     * Вывод формы редактирования множественного свойства. Если отсутствует, то используется GetPropertyFieldHtml для
+     * каждого значения отдельно (у множественных свойств).
+     *
+     * @param array $property
+     * @param array $value
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/getpropertyfieldhtmlmulty.php
+     */
+    public function getPropertyFieldHtmlMulty(array $property, array $value, array $control);
+
+    /**
+     * Выводит html для фильтра по свойству на административной странице списка элементов инфоблока.
+     *
+     * @internal Если фильтр выбран, то получить доступ к его значению можно только через $GLOBALS[$control['VALUE']]
+     *
+     * @param array $property
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/getadminfilterhtml.php
+     */
+    public function getAdminFilterHTML(array $property, array $control);
+
+    /**
+     * Выводит html для фильтра по свойству на публичной странице списка элементов инфоблока.
+     *
+     * @param array $property
+     * @param array $control
+     *
+     * @return string
+     *
+     * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/getpublicfilterhtml.php
+     */
+    public function getPublicFilterHTML(array $property, array $control);
 
 }
