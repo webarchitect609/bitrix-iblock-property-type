@@ -3,6 +3,7 @@
 namespace WebArch\BitrixIblockPropertyType\Abstraction;
 
 use WebArch\BitrixIblockPropertyType\Exception\NotImplementedMethodException;
+use WebArch\BitrixIblockPropertyType\Exception\UnsupportedControlModeException;
 
 abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 {
@@ -131,6 +132,110 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
         }
 
         return '';
+    }
+
+    /**
+     * Возвращает name и key по имени поля ввода для значения.
+     *
+     * @param array $control
+     *
+     * @return array
+     * @throws UnsupportedControlModeException
+     */
+    protected function parseNameAndKeyFromControl(array $control)
+    {
+        $matches = [];
+        /**
+         * 'PROP[111][69516][VALUE]' -> 'PROP[111]' && '69516'
+         */
+        if (
+            self::CONTROL_MODE_FORM_FILL === $this->getControlMode($control)
+            && preg_match('/^(PROP\[[^\]]+\])\[([^\]]+)\]/', $control['VALUE'], $matches) === 1
+        ) {
+            return [$matches[1], $matches[2]];
+        }
+
+        /**
+         * 'FIELDS[7234][PROPERTY_111][69516][VALUE]' -> 'FIELDS[7234][PROPERTY_111]' && '69516'
+         */
+        if (
+            self::CONTROL_MODE_IBLOCK_ELEMENT_ADMIN === $this->getControlMode($control)
+            && preg_match('/^(FIELDS\[[^\]]+\]\[[^\]]+\])\[([^\]]+)\]/', $control['VALUE'], $matches) === 1
+        ) {
+            return [$matches[1], $matches[2]];
+        }
+
+        throw new UnsupportedControlModeException($control['MODE']);
+    }
+
+    /**
+     * Возвращает массив $control, пригодный для передачи в self::getPropertyFieldHtml на основании $control,
+     * переданного в self::getPropertyFieldHtmlMulty
+     *
+     * @param array $control
+     * @param string $key
+     *
+     * @return array
+     */
+    protected function convertControlFromMultiToSingle(array $control, $key)
+    {
+        $singleControlName = $control;
+
+        $singleControlName['VALUE'] = sprintf(
+            '%s[%s][VALUE]',
+            $control['VALUE'],
+            $key
+        );
+
+        $singleControlName['DESCRIPTION'] = sprintf(
+            '%s[%s][DESCRIPTION]',
+            $control['VALUE'],
+            $key
+        );
+
+        return $singleControlName;
+    }
+
+    /**
+     * Возвращает JS код показа всплывающего окна для поиска элемента инфоблока, который можно, например, вставить в
+     * аттрибут onclick
+     *
+     * @param string $name
+     * @param string $key
+     * @param int $iblockId
+     * @param int $width
+     * @param int $height
+     * @param string $lang
+     * @param string $iblockfix
+     *
+     * @return string
+     */
+    protected function getIblockElementSearchPopupJS(
+        $name,
+        $key,
+        $iblockId = 0,
+        $width = 900,
+        $height = 700,
+        $lang = LANGUAGE_ID,
+        $iblockfix = 'y'
+    ) {
+        $params = [
+            'lang'      => $lang,
+            'IBLOCK_ID' => $iblockId,
+            'n'         => $name,
+            'k'         => $key,
+            'iblockfix' => $iblockfix,
+        ];
+        if ($iblockId <= 0) {
+            unset($params['IBLOCK_ID']);
+        }
+
+        return sprintf(
+            "jsUtils.OpenWindow('%s', %d, %d);",
+            '/bitrix/admin/iblock_element_search.php?' . htmlentities(http_build_query($params)),
+            $width,
+            $height
+        );
     }
 
     /**
