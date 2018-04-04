@@ -1,0 +1,20 @@
+{
+  "name": "webarchitect609/bitrix-iblock-property-type",
+  "description": "Collection of custom iblock property types.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sergey Gripinskiy",
+      "email": "web-architect@mail.ru"
+    }
+  ],
+  "require": {
+    "php": ">=5.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "WebArch\\BitrixIblockPropertyType\\": "src/main"
+    }
+  }
+}
