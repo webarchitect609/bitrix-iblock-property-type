@@ -139,7 +139,7 @@ class YesNoType extends IblockPropertyTypeBase
      */
     public function convertFromDB(array $property, array $value)
     {
-        $value['VALUE'] = self::normalize($value);
+        $value['VALUE'] = self::isYes($value);
 
         return $value;
     }
