@@ -147,10 +147,12 @@ class YesNoType extends IblockPropertyTypeBase
     {
         /**
          * При чтении из БД возможно также неоднозначное состояние "Не задано".
+         * При этом при запросе через CIBlockElement::GetList в $value['VALUE'] будет '1.0000',
+         * поэтому строгое равенство использовать нельзя.
          */
-        if ('1' === $value['VALUE']) {
+        if ('1' == $value['VALUE']) {
             $value['VALUE'] = true;
-        } elseif ('0' === $value['VALUE']) {
+        } elseif ('0' == $value['VALUE']) {
             $value['VALUE'] = false;
         } else {
             $value['VALUE'] = null;
