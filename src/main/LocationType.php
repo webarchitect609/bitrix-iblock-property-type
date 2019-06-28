@@ -10,8 +10,9 @@ use Bitrix\Sale\Location\Admin\LocationHelper;
 use WebArch\BitrixIblockPropertyType\Abstraction\IblockPropertyTypeBase;
 
 /**
- * Class Location
- * @package Adv\AdvApplication\IblockProperty
+ * Class LocationType
+ *
+ * @package WebArch\BitrixIblockPropertyType
  */
 class LocationType extends IblockPropertyTypeBase
 {
@@ -67,10 +68,9 @@ class LocationType extends IblockPropertyTypeBase
      * @throws SystemException
      */
     public function getPropertyFieldHtml(
-        /** @noinspection PhpUnusedParameterInspection */
-        $property,
-        $value,
-        $control
+        array $property,
+        array $value,
+        array $control
     )
     {
         $result = false;
