@@ -210,12 +210,12 @@ interface IblockPropertyTypeInterface
     /**
      * Выводит html для фильтра по свойству на административной странице списка элементов инфоблока.
      *
-     * @internal Если фильтр выбран, то получить доступ к его значению можно только через $GLOBALS[$control['VALUE']]
-     *
      * @param array $property
      * @param array $control
      *
      * @return string
+     *
+     * @internal Если фильтр выбран, то получить доступ к его значению можно только через $GLOBALS[$control['VALUE']]
      *
      * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/getadminfilterhtml.php
      */
@@ -233,4 +233,37 @@ interface IblockPropertyTypeInterface
      */
     public function getPublicFilterHTML(array $property, array $control);
 
+    /**
+     * Управляет отображением фильтра по свойству в списке элементов.
+     *
+     * @param array $property
+     * @param string $controlName Название инпута.
+     * @param array $filter Ссылка на массив параметров внешнего вида фильтра по свойству.
+     *  Возможные значения 'type':
+     *  <ul>
+     *      <li>string</li>
+     *      <li>number</li>
+     *      <li>list</li>
+     *      <li>custom_entity</li>
+     *      <li>date</li>
+     *  </ul>
+     *  Если type=list, то в items массив ['значение' => 'заголовок'].
+     *  Если type=date, то time=true|false|null и filterable=''
+     *  Если type=custom_entity, то property=$property, customRender=string callable , customFilter = void callable.
+     *     (см. \CIBlockPropertyElementAutoComplete::GetUIFilterProperty )
+     *
+     *  'filterable' обычно пустая строка или '?', когда type=string.
+     *
+     * @return void
+     *
+     * @see \CIBlockPropertyElementAutoComplete::GetUIFilterProperty
+     * @see \CIBlockPropertyDateTime::GetUIFilterProperty
+     * @see \CIBlockPropertyDate::GetUIFilterProperty
+     * @see \CIBlockPropertySequence::GetUIFilterProperty
+     * @see \CIBlockPropertyHTML::GetUIFilterProperty
+     * @see \CIBlockPropertyElementList::GetUIFilterProperty
+     *
+     * @internal Официальной документации по методу не существует.
+     */
+    public function getUIFilterProperty(array $property, $controlName, array &$filter);
 }

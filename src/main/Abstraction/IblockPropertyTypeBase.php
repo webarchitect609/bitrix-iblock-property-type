@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpUnused */
 
 namespace WebArch\BitrixIblockPropertyType\Abstraction;
 
@@ -102,9 +102,9 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      * Неуказанные методы будут заменены на стандартную реализацию из модуля инфоблоков. Если же метод указан, но не
      * имеет конкретной реализации, будет выброшено исключение NotImplementedMethodException()
      *
+     * @return array
      * @see IblockPropertyTypeInterface::getUserTypeDescription
      *
-     * @return array
      */
     abstract public function getCallbacksMapping();
 
@@ -139,8 +139,8 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      *
      * @param array $control
      *
-     * @return array
      * @throws UnsupportedControlModeException
+     * @return array
      */
     protected function parseNameAndKeyFromControl(array $control)
     {
@@ -150,7 +150,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
          */
         if (
             self::CONTROL_MODE_FORM_FILL === $this->getControlMode($control)
-            && preg_match('/^(PROP\[[^\]]+\])\[([^\]]+)\]/', $control['VALUE'], $matches) === 1
+            && preg_match('/^(PROP\[[^]]+])\[([^]]+)]/', $control['VALUE'], $matches) === 1
         ) {
             return [$matches[1], $matches[2]];
         }
@@ -160,7 +160,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
          */
         if (
             self::CONTROL_MODE_IBLOCK_ELEMENT_ADMIN === $this->getControlMode($control)
-            && preg_match('/^(FIELDS\[[^\]]+\]\[[^\]]+\])\[([^\]]+)\]/', $control['VALUE'], $matches) === 1
+            && preg_match('/^(FIELDS\[[^]]+]\[[^]]+])\[([^]]+)]/', $control['VALUE'], $matches) === 1
         ) {
             return [$matches[1], $matches[2]];
         }
@@ -240,6 +240,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function checkFields(array $property, array $value)
     {
@@ -248,6 +249,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getLength(array $property, array $value)
     {
@@ -256,6 +258,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function convertToDB(array $property, array $value)
     {
@@ -264,6 +267,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function convertFromDB(array $property, array $value)
     {
@@ -272,6 +276,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getPropertyFieldHtml(array $property, array $value, array $control)
     {
@@ -280,6 +285,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getAdminListViewHTML(array $property, array $value, array $control)
     {
@@ -288,6 +294,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getPublicViewHTML(array $property, array $value, array $control)
     {
@@ -296,6 +303,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getPublicEditHTML(array $property, array $value, array $control)
     {
@@ -304,6 +312,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getSearchContent(array $property, array $value, array $control)
     {
@@ -312,6 +321,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function prepareSettings(array $property)
     {
@@ -320,6 +330,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getSettingsHTML(array $property, array $value, array $control)
     {
@@ -328,6 +339,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getPropertyFieldHtmlMulty(array $property, array $value, array $control)
     {
@@ -336,6 +348,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getAdminFilterHTML(array $property, array $control)
     {
@@ -344,10 +357,20 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
 
     /**
      * @inheritdoc
+     * @throws NotImplementedMethodException
      */
     public function getPublicFilterHTML(array $property, array $control)
     {
         throw new NotImplementedMethodException('getPublicFilterHTML', static::class);
+    }
+
+    /**
+     * @inheritdoc
+     * @throws NotImplementedMethodException
+     */
+    public function getUIFilterProperty(array $property, $controlName, array &$filter)
+    {
+        throw new NotImplementedMethodException('getUIFilterProperty', static::class);
     }
 
 }

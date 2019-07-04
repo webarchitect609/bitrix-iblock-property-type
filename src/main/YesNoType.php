@@ -23,8 +23,6 @@ class YesNoType extends IblockPropertyTypeBase
 
     const VALUE_NO = false;
 
-    const VALUE_UNDEFINED = null;
-
     /**
      * @inheritdoc
      */

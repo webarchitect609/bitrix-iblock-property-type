@@ -2,10 +2,8 @@
 
 namespace WebArch\BitrixIblockPropertyType;
 
-use Bitrix\Main\ArgumentTypeException;
 use Bitrix\Main\Loader;
 use Bitrix\Main\LoaderException;
-use Bitrix\Main\SystemException;
 use Bitrix\Sale\Location\Admin\LocationHelper;
 use WebArch\BitrixIblockPropertyType\Abstraction\IblockPropertyTypeBase;
 
@@ -38,69 +36,49 @@ class LocationType extends IblockPropertyTypeBase
     public function getCallbacksMapping()
     {
         return [
-            'GetAdminListViewHTML' => [
-                $this,
-                'getAdminListViewHTML',
-            ],
-            'GetPropertyFieldHtml' => [
-                $this,
-                'getPropertyFieldHtml',
-            ],
+            'GetAdminListViewHTML' => [$this, 'getAdminListViewHTML'],
+            'GetPropertyFieldHtml' => [$this, 'getPropertyFieldHtml'],
         ];
     }
 
     /**
-     * @return string
-     */
-    public function getUserType()
-    {
-        return 'sale_location';
-    }
-
-    /**
-     * @param array $property
-     * @param array $value
-     * @param array $control
-     *
-     * @return bool|string
-     * @throws ArgumentTypeException
+     * @inheritDoc
      * @throws LoaderException
-     * @throws SystemException
      */
     public function getPropertyFieldHtml(
         array $property,
         array $value,
         array $control
-    )
-    {
-        $result = false;
-        if (Loader::includeModule('sale')) {
-            global $APPLICATION;
-            ob_start();
-            $APPLICATION->IncludeComponent(
-                'bitrix:sale.location.selector.search',
-                '',
-                [
-                    'COMPONENT_TEMPLATE'     => 'search',
-                    'ID'                     => '',
-                    'CODE'                   => htmlspecialcharsbx($value['VALUE']),
-                    'INPUT_NAME'             => htmlspecialcharsbx($control['VALUE']),
-                    'PROVIDE_LINK_BY'        => 'code',
-                    'JSCONTROL_GLOBAL_ID'    => '',
-                    'JS_CALLBACK'            => '',
-                    'SEARCH_BY_PRIMARY'      => 'Y',
-                    'EXCLUDE_SUBTREE'        => '',
-                    'FILTER_BY_SITE'         => 'Y',
-                    'SHOW_DEFAULT_LOCATIONS' => 'Y',
-                    'CACHE_TYPE'             => 'A',
-                    'CACHE_TIME'             => '36000000',
-                ],
-                false
-            );
-            $result = ob_get_clean();
+    ) {
+        global $APPLICATION;
+
+        if (!Loader::includeModule('sale')) {
+            return $property['VALUE'];
         }
 
-        return $result;
+        ob_start();
+        $APPLICATION->IncludeComponent(
+            'bitrix:sale.location.selector.search',
+            '',
+            [
+                'COMPONENT_TEMPLATE'     => 'search',
+                'ID'                     => '',
+                'CODE'                   => htmlspecialcharsbx($value['VALUE']),
+                'INPUT_NAME'             => htmlspecialcharsbx($control['VALUE']),
+                'PROVIDE_LINK_BY'        => 'code',
+                'JSCONTROL_GLOBAL_ID'    => '',
+                'JS_CALLBACK'            => '',
+                'SEARCH_BY_PRIMARY'      => 'Y',
+                'EXCLUDE_SUBTREE'        => '',
+                'FILTER_BY_SITE'         => 'Y',
+                'SHOW_DEFAULT_LOCATIONS' => 'Y',
+                'CACHE_TYPE'             => 'A',
+                'CACHE_TIME'             => '36000000',
+            ],
+            false
+        );
+
+        return ob_get_clean();
     }
 
     /**
@@ -108,17 +86,15 @@ class LocationType extends IblockPropertyTypeBase
      * @param array $value
      * @param array $control
      *
-     * @return bool|string
      * @throws LoaderException
+     * @return string
      */
     public function getAdminListViewHTML(array $property, array $value, array $control)
     {
-        $result = false;
-        if (Loader::includeModule('sale')) {
-            $result = LocationHelper::getLocationStringByCode($property['VALUE']);
+        if (!Loader::includeModule('sale')) {
+            return $property['VALUE'];
         }
 
-        return $result;
+        return LocationHelper::getLocationStringByCode($property['VALUE']);
     }
 }
-
