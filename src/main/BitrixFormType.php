@@ -7,12 +7,12 @@ use CForm;
 use WebArch\BitrixIblockPropertyType\Abstraction\IblockPropertyTypeBase;
 
 /**
- * Class BitrixForm
+ * Class BitrixFormType
  * Привязка к форме
  *
  * @package WebArch\BitrixIblockPropertyType
  */
-class BitrixForm extends IblockPropertyTypeBase
+class BitrixFormType extends IblockPropertyTypeBase
 {
     private static $formsCache;
 
