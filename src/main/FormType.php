@@ -65,6 +65,10 @@ class FormType extends IblockPropertyTypeBase
      */
     public function getPropertyFieldHtml(array $property, array $value, array $control)
     {
+        if (!Loader::includeModule('form')) {
+            return $value['VALUE'];
+        }
+
         return self::getFormFieldHtml($control['VALUE'], $value['VALUE']);
     }
 

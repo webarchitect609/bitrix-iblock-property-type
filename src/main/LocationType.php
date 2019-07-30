@@ -53,7 +53,7 @@ class LocationType extends IblockPropertyTypeBase
         global $APPLICATION;
 
         if (!Loader::includeModule('sale')) {
-            return $property['VALUE'];
+            return $value['VALUE'];
         }
 
         ob_start();
@@ -92,9 +92,9 @@ class LocationType extends IblockPropertyTypeBase
     public function getAdminListViewHTML(array $property, array $value, array $control)
     {
         if (!Loader::includeModule('sale')) {
-            return $property['VALUE'];
+            return $value['VALUE'];
         }
 
-        return LocationHelper::getLocationStringByCode($property['VALUE']);
+        return LocationHelper::getLocationStringByCode($value['VALUE']);
     }
 }
