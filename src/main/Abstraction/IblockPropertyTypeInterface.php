@@ -184,28 +184,28 @@ interface IblockPropertyTypeInterface
      * Метод должен вернуть безопасный HTML отображения настроек свойства для формы редактирования инфоблока.
      *
      * @param array $property
-     * @param array $value
      * @param array $control
+     * @param array $propertyFields
      *
      * @return string
      *
      * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/GetSettingsHTML.php
      */
-    public function getSettingsHTML(array $property, array $value, array $control);
+    public function getSettingsHTML(array $property, array $control, array $propertyFields);
 
     /**
      * Вывод формы редактирования множественного свойства. Если отсутствует, то используется GetPropertyFieldHtml для
      * каждого значения отдельно (у множественных свойств).
      *
      * @param array $property
-     * @param array $value
+     * @param array $valueList
      * @param array $control
      *
      * @return string
      *
      * @link https://dev.1c-bitrix.ru/api_help/iblock/classes/user_properties/getpropertyfieldhtmlmulty.php
      */
-    public function getPropertyFieldHtmlMulty(array $property, array $value, array $control);
+    public function getPropertyFieldHtmlMulty(array $property, array $valueList, array $control);
 
     /**
      * Выводит html для фильтра по свойству на административной странице списка элементов инфоблока.
@@ -237,7 +237,7 @@ interface IblockPropertyTypeInterface
      * Управляет отображением фильтра по свойству в списке элементов.
      *
      * @param array $property
-     * @param string $controlName Название инпута.
+     * @param array $control
      * @param array $filter Ссылка на массив параметров внешнего вида фильтра по свойству.
      *  Возможные значения 'type':
      *  <ul>
@@ -265,5 +265,5 @@ interface IblockPropertyTypeInterface
      *
      * @internal Официальной документации по методу не существует.
      */
-    public function getUIFilterProperty(array $property, $controlName, array &$filter);
+    public function getUIFilterProperty(array $property, array $control, array &$filter);
 }

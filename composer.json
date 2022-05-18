@@ -25,7 +25,9 @@
     }
   ],
   "require": {
-    "php": ">=5.5"
+    "php": "^7.2",
+    "anahkiasen/html-object": "^1.4",
+    "webarchitect609/bitrix-cache": "^1.8.0"
   },
   "autoload": {
     "psr-4": {

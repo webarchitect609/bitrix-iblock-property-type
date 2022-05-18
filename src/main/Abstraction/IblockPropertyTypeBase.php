@@ -2,6 +2,7 @@
 
 namespace WebArch\BitrixIblockPropertyType\Abstraction;
 
+use Bitrix\Main\EventManager;
 use WebArch\BitrixIblockPropertyType\Exception\NotImplementedMethodException;
 use WebArch\BitrixIblockPropertyType\Exception\UnsupportedControlModeException;
 
@@ -39,11 +40,12 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      */
     public function init()
     {
-        AddEventHandler(
-            'iblock',
-            'OnIBlockPropertyBuildList',
-            [$this, 'getUserTypeDescription']
-        );
+        EventManager::getInstance()
+                    ->addEventHandler(
+                        'iblock',
+                        'OnIBlockPropertyBuildList',
+                        [$this, 'getUserTypeDescription']
+                    );
     }
 
     /**
@@ -220,10 +222,10 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
         $iblockfix = 'y'
     ) {
         $params = [
-            'lang'      => $lang,
+            'lang' => $lang,
             'IBLOCK_ID' => $iblockId,
-            'n'         => $name,
-            'k'         => $key,
+            'n' => $name,
+            'k' => $key,
             'iblockfix' => $iblockfix,
         ];
         if ($iblockId <= 0) {
@@ -332,7 +334,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      * @inheritdoc
      * @throws NotImplementedMethodException
      */
-    public function getSettingsHTML(array $property, array $value, array $control)
+    public function getSettingsHTML(array $property, array $control, array $propertyFields)
     {
         throw new NotImplementedMethodException('getSettingsHTML', static::class);
     }
@@ -341,7 +343,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      * @inheritdoc
      * @throws NotImplementedMethodException
      */
-    public function getPropertyFieldHtmlMulty(array $property, array $value, array $control)
+    public function getPropertyFieldHtmlMulty(array $property, array $valueList, array $control)
     {
         throw new NotImplementedMethodException('getPropertyFieldHtmlMulty', static::class);
     }
@@ -368,7 +370,7 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
      * @inheritdoc
      * @throws NotImplementedMethodException
      */
-    public function getUIFilterProperty(array $property, $controlName, array &$filter)
+    public function getUIFilterProperty(array $property, array $control, array &$filter)
     {
         throw new NotImplementedMethodException('getUIFilterProperty', static::class);
     }

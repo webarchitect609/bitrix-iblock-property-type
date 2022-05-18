@@ -5,7 +5,7 @@ namespace WebArch\BitrixIblockPropertyType\Exception;
 use Exception;
 use Throwable;
 
-class UnsupportedControlModeException extends Exception
+class UnsupportedControlModeException extends Exception implements BitrixIblockPropertyTypeExceptionInterface
 {
     /**
      * UnsupportedControlModeException constructor.
@@ -22,5 +22,4 @@ class UnsupportedControlModeException extends Exception
         );
         parent::__construct($message, $code, $previous);
     }
-
 }

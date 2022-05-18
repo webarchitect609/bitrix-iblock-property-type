@@ -5,7 +5,7 @@ namespace WebArch\BitrixIblockPropertyType\Exception;
 use Exception;
 use Throwable;
 
-class NotImplementedMethodException extends Exception
+class NotImplementedMethodException extends Exception implements BitrixIblockPropertyTypeExceptionInterface
 {
     /**
      * NotImplementedMethodException constructor.
@@ -24,5 +24,4 @@ class NotImplementedMethodException extends Exception
         );
         parent::__construct($message, $code, $previous);
     }
-
 }

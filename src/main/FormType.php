@@ -76,7 +76,7 @@ class FormType extends IblockPropertyTypeBase
      * @inheritdoc
      * @throws LoaderException
      */
-    public function getUIFilterProperty(array $property, $controlName, array &$filter)
+    public function getUIFilterProperty(array $property, array $control, array &$filter)
     {
         $filter["type"] = "list";
         $filter["items"] = array_column(self::getFormList(), 'NAME', 'SID');
