@@ -14,9 +14,11 @@ use CIBlockProperty;
 use HtmlObject\Element;
 use Psr\Log\LoggerAwareTrait;
 use ReflectionException;
+use UnexpectedValueException;
 use WebArch\BitrixCache\Cache;
 use WebArch\BitrixIblockPropertyType\Abstraction\IblockPropertyTypeBase;
 use WebArch\BitrixIblockPropertyType\Exception\NoTableNameException;
+use WebArch\BitrixIblockPropertyType\Exception\SortValuesByDescriptionImpossibleException;
 
 class DirectorySortableType extends IblockPropertyTypeBase
 {
@@ -237,8 +239,8 @@ class DirectorySortableType extends IblockPropertyTypeBase
     ) {
         // Множество свойств
         if (false === $propertyCode) {
-            foreach ($this->filterSupportedPropsById($propertyValues) as $propId => $values) {
-                $this->doSortValuesAfterAnySetPropValues($elementId, $iblockId, $propId, $values);
+            foreach ($this->filterSupportedPropsById($propertyValues, $iblockId) as $propIdOrCode => $values) {
+                $this->doSortValuesAfterAnySetPropValues($elementId, $iblockId, $propIdOrCode, $values);
             }
         }
         // Одно свойство по коду
@@ -246,7 +248,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
             $this->doSortValuesAfterAnySetPropValues(
                 $elementId,
                 $iblockId,
-                $this->getPropIdByIblockIdAndPropCode($iblockId, $propertyCode),
+                $propertyCode,
                 $propertyValues
             );
         }
@@ -262,20 +264,20 @@ class DirectorySortableType extends IblockPropertyTypeBase
      */
     public function sortValuesAfterSetPropertyValuesEx(int $elementId, int $iblockId, array $propertyValues): void
     {
-        foreach ($this->filterSupportedPropsById($propertyValues) as $propId => $values) {
-            $this->doSortValuesAfterAnySetPropValues($elementId, $iblockId, $propId, $values);
+        foreach ($this->filterSupportedPropsById($propertyValues, $iblockId) as $propIdOrCode => $values) {
+            $this->doSortValuesAfterAnySetPropValues($elementId, $iblockId, $propIdOrCode, $values);
         }
     }
 
     /**
      * @param int $elementId
      * @param int $iblockId
-     * @param int $propId
+     * @param int|string $propIdOrCode
      * @param false|array $values
      *
      * @return void
      */
-    private function doSortValuesAfterAnySetPropValues(int $elementId, int $iblockId, int $propId, $values): void
+    private function doSortValuesAfterAnySetPropValues(int $elementId, int $iblockId, $propIdOrCode, $values): void
     {
         if (!is_array($values)) {
             return;
@@ -291,8 +293,8 @@ class DirectorySortableType extends IblockPropertyTypeBase
             return;
         }
         // Предварительное принудительное удаление, иначе они не перестроятся.
-        CIBlockElement::SetPropertyValuesEx($elementId, $iblockId, [$propId => false]);
-        CIBlockElement::SetPropertyValuesEx($elementId, $iblockId, [$propId => $sortedValues]);
+        CIBlockElement::SetPropertyValuesEx($elementId, $iblockId, [$propIdOrCode => false]);
+        CIBlockElement::SetPropertyValuesEx($elementId, $iblockId, [$propIdOrCode => $sortedValues]);
     }
 
     /**
@@ -323,7 +325,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
                     )
                     ->setTTL(120)
                     ->callback(
-                        function () use ($hlTableName, $limit) {
+                        static function () use ($hlTableName, $limit) {
                             $hlBlockFields = HighloadBlockTable::query()
                                                                ->setSelect(['TABLE_NAME', 'NAME', 'ID'])
                                                                ->setFilter(['=TABLE_NAME' => $hlTableName])
@@ -492,12 +494,30 @@ class DirectorySortableType extends IblockPropertyTypeBase
     {
         $keepKeys = array_keys($valueList);
         $justSorted = $valueList;
-        usort(
-            $justSorted,
-            function (array $a, array $b) {
-                return $a['DESCRIPTION'] <=> $b['DESCRIPTION'];
-            }
-        );
+        try {
+            usort(
+                $justSorted,
+                static function ($a, $b) {
+                    if (
+                        is_array($a)
+                        && key_exists('DESCRIPTION', $a)
+                        && is_array($b)
+                        && key_exists('DESCRIPTION', $b)
+                    ) {
+                        return (int)$a['DESCRIPTION'] <=> (int)$b['DESCRIPTION'];
+                    }
+                    /*
+                     * Опасно возвращать 0, т.к. очерёдность элементов с одинаковой сортировкой в PHP < 8.0
+                     * не определена, и может потенциально возникнуть бесконечная рекурсия из-за перестроения.
+                     * Лучше отменить сортировку.
+                     */
+                    throw new SortValuesByDescriptionImpossibleException();
+                }
+            );
+        } catch (SortValuesByDescriptionImpossibleException $exception) {
+            // Сортировка невозможна: сохранить прежний порядок.
+            $justSorted = $valueList;
+        }
 
         $sortedValueList = [];
         foreach ($justSorted as $value) {
@@ -519,25 +539,27 @@ class DirectorySortableType extends IblockPropertyTypeBase
         return Cache::create()
                     ->setPathByClass(static::class)
                     ->setKey(__FUNCTION__)
-                    ->callback(function () {
-                        $result = CIBlockProperty::GetList(
-                            [],
-                            [
-                                'USER_TYPE' => $this->getUserType(),
-                                'MULTIPLE'  => 'Y',
-                            ]
-                        );
-                        $byId = [];
-                        $byIblockIdAndCode = [];
-                        while ($row = $result->Fetch()) {
-                            $byId[(int)$row['ID']] = true;
-                            if (trim($row['CODE']) != '') {
-                                $byIblockIdAndCode[(int)$row['IBLOCK_ID']][trim($row['CODE'])] = (int)$row['ID'];
+                    ->callback(
+                        function () {
+                            $result = CIBlockProperty::GetList(
+                                [],
+                                [
+                                    'USER_TYPE' => $this->getUserType(),
+                                    'MULTIPLE'  => 'Y',
+                                ]
+                            );
+                            $byId = [];
+                            $byIblockIdAndCode = [];
+                            while ($row = $result->Fetch()) {
+                                $byId[(int)$row['ID']] = true;
+                                if (trim($row['CODE']) != '') {
+                                    $byIblockIdAndCode[(int)$row['IBLOCK_ID']][trim($row['CODE'])] = (int)$row['ID'];
+                                }
                             }
-                        }
 
-                        return [$byId, $byIblockIdAndCode];
-                    });
+                            return [$byId, $byIblockIdAndCode];
+                        }
+                    );
     }
 
     /**
@@ -580,33 +602,30 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
+     * @param array<int|string, array> $propertyValues
      * @param int $iblockId
-     * @param string $propCode
-     *
-     * @throws ReflectionException
-     * @return int|null
-     */
-    private function getPropIdByIblockIdAndPropCode(int $iblockId, string $propCode): ?int
-    {
-        if ($this->isSupportedIblockAndCode($iblockId, $propCode)) {
-            return $this->propIdByIblockIdAndCodeIndex[$iblockId][$propCode];
-        }
-
-        return null;
-    }
-
-    /**
-     * @param array $propertyValues
      *
      * @throws ReflectionException
      * @return array
      */
-    private function filterSupportedPropsById(array $propertyValues): array
+    private function filterSupportedPropsById(array $propertyValues, int $iblockId): array
     {
         return array_filter(
             $propertyValues,
-            function (int $propId) {
-                return $this->isSupportedPropId($propId);
+            function ($propIdOrCode) use ($iblockId) {
+                if (is_int($propIdOrCode)) {
+                    return $this->isSupportedPropId($propIdOrCode);
+                }
+                if (is_string($propIdOrCode)) {
+                    return $this->isSupportedIblockAndCode($iblockId, $propIdOrCode);
+                }
+                throw new UnexpectedValueException(
+                    sprintf(
+                        'Expected key of property values to be int or string, but got %s `%s`',
+                        gettype($propIdOrCode),
+                        $propIdOrCode
+                    )
+                );
             },
             ARRAY_FILTER_USE_KEY
         );
@@ -623,10 +642,15 @@ class DirectorySortableType extends IblockPropertyTypeBase
     {
         return array_filter(
             $propertyValues,
-            function (array $value) {
-                return key_exists('VALUE', $value)
-                    && $value['VALUE'] !== false
-                    && trim($value['VALUE']) !== '';
+            static function ($value) {
+                // "Распаковка" значения из массива, если требуется.
+                if (is_array($value) && key_exists('VALUE', $value)) {
+                    $realValue = $value['VALUE'];
+                } else {
+                    $realValue = $value;
+                }
+
+                return $realValue !== false && trim($realValue) !== '';
             }
         );
     }
