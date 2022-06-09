@@ -375,4 +375,13 @@ abstract class IblockPropertyTypeBase implements IblockPropertyTypeInterface
         throw new NotImplementedMethodException('getUIFilterProperty', static::class);
     }
 
+    /**
+     * @return array|bool|mixed
+     */
+    protected function includeIblockElementAdminLangFile()
+    {
+        return IncludeModuleLangFile(
+            $_SERVER["DOCUMENT_ROOT"] . BX_ROOT . '/modules/iblock/admin/iblock_element_admin.php'
+        );
+    }
 }
