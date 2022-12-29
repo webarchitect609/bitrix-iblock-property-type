@@ -210,8 +210,11 @@ class DirectorySortableType extends IblockPropertyTypeBase
                         'type'    => 'button',
                         'value'   => 'Ещё',
                         'onclick' => sprintf(
-                            'if(window.addNewRow){addNewRow(\'%s\', -1)}'
-                            . 'else{addNewTableRow(\'%s\', 1, /\[(n)([0-9]*)\]/g, 2)}',
+                            'if(typeof window.addNewRow === \'function\') {addNewRow(\'%s\', -1)}'
+                            . 'else if(typeof window.addNewTableRow === \'function\'){addNewTableRow(\'%s\', 1, /\[(n)([0-9]*)\]/g, 2)}'
+                            . 'else if(typeof BX.IBlock.Tools.addNewRow === \'function\'){BX.IBlock.Tools.addNewRow(\'%s\', -1)}'
+                            . 'else { window.alert(\'Unable to find «addNewRow» JavaScript function.\') }',
+                            $tableId,
                             $tableId,
                             $tableId
                         ),
