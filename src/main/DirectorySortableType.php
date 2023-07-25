@@ -84,6 +84,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
             'GetSettingsHTML'           => [$this, 'getSettingsHTML'],
             'GetPropertyFieldHtml'      => [$this, 'getPropertyFieldHtml'],
             'GetPropertyFieldHtmlMulty' => [$this, 'getPropertyFieldHtmlMulty'],
+            'GetAdminListViewHTML'      => [$this, 'getAdminListViewHTML'],
         ];
     }
 
@@ -161,7 +162,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
         try {
             return $this->getSelect(
                 $property[self::USER_TYPE_SETTINGS][self::SETTING_TABLE_NAME],
-                $value['VALUE'],
+                (string)$value['VALUE'],
                 $control['VALUE']
             );
         } catch (NoTableNameException $exception) {
@@ -226,9 +227,25 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
-     * @param int $elementId
-     * @param int $iblockId
-     * @param array $propertyValues
+     * @inheritDoc
+     * @noinspection ReturnTypeCanBeDeclaredInspection
+     * @throws NoTableNameException
+     * @throws ReflectionException
+     */
+    public function getAdminListViewHTML(array $property, array $value, array $control)
+    {
+        $itemList = $this->getReferenceItemList($property[self::USER_TYPE_SETTINGS][self::SETTING_TABLE_NAME]);
+        if (key_exists('VALUE', $value) && key_exists($value['VALUE'], $itemList)) {
+            return $itemList[$value['VALUE']];
+        }
+
+        return '';
+    }
+
+    /**
+     * @param int          $elementId
+     * @param int          $iblockId
+     * @param array        $propertyValues
      * @param false|string $propertyCode
      *
      * @throws ReflectionException
@@ -239,7 +256,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
         int   $iblockId,
         array $propertyValues,
               $propertyCode
-    ) {
+    ): void {
         // Множество свойств
         if (false === $propertyCode) {
             foreach ($this->filterSupportedPropsById($propertyValues, $iblockId) as $propIdOrCode => $values) {
@@ -258,8 +275,8 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
-     * @param int $elementId
-     * @param int $iblockId
+     * @param int   $elementId
+     * @param int   $iblockId
      * @param array $propertyValues
      *
      * @throws ReflectionException
@@ -273,9 +290,9 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
-     * @param int $elementId
-     * @param int $iblockId
-     * @param int|string $propIdOrCode
+     * @param int         $elementId
+     * @param int         $iblockId
+     * @param int|string  $propIdOrCode
      * @param false|array $values
      *
      * @return void
@@ -302,7 +319,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
 
     /**
      * @param string $hlTableName
-     * @param int $limit
+     * @param int    $limit
      *
      * @throws NoTableNameException
      * @throws ReflectionException
@@ -413,9 +430,9 @@ class DirectorySortableType extends IblockPropertyTypeBase
 
     /**
      * @param string $valueId
-     * @param array $property
-     * @param array $singleValue
-     * @param array $control
+     * @param array  $property
+     * @param array  $singleValue
+     * @param array  $control
      *
      * @throws NoTableNameException
      * @throws ReflectionException
@@ -431,7 +448,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
                         Element::td(
                             $this->getSelect(
                                 $property[self::USER_TYPE_SETTINGS][self::SETTING_TABLE_NAME],
-                                $singleValue['VALUE'],
+                                (string)$singleValue['VALUE'],
                                 $control['VALUE'] . '[' . $valueId . '][VALUE]'
                             )
                         )
@@ -449,7 +466,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
-     * @param int $sortValue
+     * @param int    $sortValue
      * @param string $inputName
      *
      * @return Element
@@ -555,7 +572,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
                             $byIblockIdAndCode = [];
                             while ($row = $result->Fetch()) {
                                 $byId[(int)$row['ID']] = true;
-                                if (trim($row['CODE']) != '') {
+                                if (trim($row['CODE']) !== '') {
                                     $byIblockIdAndCode[(int)$row['IBLOCK_ID']][trim($row['CODE'])] = (int)$row['ID'];
                                 }
                             }
@@ -588,7 +605,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
     }
 
     /**
-     * @param int $iblockId
+     * @param int    $iblockId
      * @param string $propCode
      *
      * @throws ReflectionException
@@ -606,7 +623,7 @@ class DirectorySortableType extends IblockPropertyTypeBase
 
     /**
      * @param array<int|string, array> $propertyValues
-     * @param int $iblockId
+     * @param int                      $iblockId
      *
      * @throws ReflectionException
      * @return array
