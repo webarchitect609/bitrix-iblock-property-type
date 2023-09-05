@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection ReturnTypeCanBeDeclaredInspection */
+
 /** @noinspection PhpMissingReturnTypeInspection */
 
 namespace WebArch\BitrixIblockPropertyType;
@@ -45,13 +47,15 @@ class LocationType extends IblockPropertyTypeBase
             'GetAdminListViewHTML'      => [$this, 'getAdminListViewHTML'],
             'GetPropertyFieldHtml'      => [$this, 'getPropertyFieldHtml'],
             'GetPropertyFieldHtmlMulty' => [$this, 'getPropertyFieldHtmlMulty'],
+            'GetAdminFilterHTML'        => [$this, 'getAdminFilterHTML'],
         ];
     }
 
     /**
      * @inheritDoc
      */
-    public function getPropertyFieldHtml(array $property, array $value, array $control) {
+    public function getPropertyFieldHtml(array $property, array $value, array $control)
+    {
         try {
             $this->includeIblockElementAdminLangFile();
             $descInput = '';
@@ -124,6 +128,22 @@ class LocationType extends IblockPropertyTypeBase
     }
 
     /**
+     * @inheritdoc
+     * @throws LoaderException
+     */
+    public function getAdminFilterHTML(array $property, array $control)
+    {
+        return $this->getValueInputWithAutoComplete(
+            $control['VALUE'],
+            $control['VALUE'],
+            [
+                'UI_FILTER'       => 'Y',
+                'SUPPRESS_ERRORS' => 'Y',
+            ]
+        );
+    }
+
+    /**
      * @param string $valueId
      * @param array $property
      * @param array $singleValue
@@ -158,12 +178,13 @@ class LocationType extends IblockPropertyTypeBase
     /**
      * @param null|string $valueValue
      * @param string $inputName
+     * @param array $params
      *
      * @throws LoaderException
      * @throws ModuleNotFoundException
      * @return false|string
      */
-    private function getValueInputWithAutoComplete(?string $valueValue, string $inputName): string
+    private function getValueInputWithAutoComplete(?string $valueValue, string $inputName, array $params = []): string
     {
         global $APPLICATION;
 
@@ -173,21 +194,24 @@ class LocationType extends IblockPropertyTypeBase
         $APPLICATION->IncludeComponent(
             'bitrix:sale.location.selector.search',
             '',
-            [
-                'COMPONENT_TEMPLATE'     => 'search',
-                'ID'                     => '',
-                'CODE'                   => htmlspecialcharsbx($valueValue),
-                'INPUT_NAME'             => htmlspecialcharsbx($inputName),
-                'PROVIDE_LINK_BY'        => 'code',
-                'JSCONTROL_GLOBAL_ID'    => '',
-                'JS_CALLBACK'            => '',
-                'SEARCH_BY_PRIMARY'      => 'Y',
-                'EXCLUDE_SUBTREE'        => '',
-                'FILTER_BY_SITE'         => 'Y',
-                'SHOW_DEFAULT_LOCATIONS' => 'Y',
-                'CACHE_TYPE'             => 'A',
-                'CACHE_TIME'             => '36000000',
-            ],
+            array_merge(
+                [
+                    'COMPONENT_TEMPLATE'     => 'search',
+                    'ID'                     => '',
+                    'CODE'                   => htmlspecialcharsbx($valueValue),
+                    'INPUT_NAME'             => htmlspecialcharsbx($inputName),
+                    'PROVIDE_LINK_BY'        => 'code',
+                    'JSCONTROL_GLOBAL_ID'    => '',
+                    'JS_CALLBACK'            => '',
+                    'SEARCH_BY_PRIMARY'      => 'Y',
+                    'EXCLUDE_SUBTREE'        => '',
+                    'FILTER_BY_SITE'         => 'Y',
+                    'SHOW_DEFAULT_LOCATIONS' => 'Y',
+                    'CACHE_TYPE'             => 'A',
+                    'CACHE_TIME'             => '36000000',
+                ],
+                $params
+            ),
             false
         );
 
